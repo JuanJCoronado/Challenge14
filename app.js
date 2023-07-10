@@ -2,21 +2,19 @@ console.log("Confirm that this is working")
 
 const URL = 'https://2u-data-curriculum-team.s3.amazonaws.com/dataviz-classroom/v1.1/14-Interactive-Web-Visualizations/02-Homework/samples.json'
 
-function optionChanged(SubjectID) {
 // TO DOs:
-// filter by Subject ID
 // Add demographics table
 
+function buildCharts(sample){
     d3.json(URL).then(d=>{
 
         // -----------------Bar Chart--------------------
         let Samples = d.samples
-        
-        for (let i = 0; i < Samples.length; i++) {
-            var xValues = Samples[i].sample_values.slice(0,10)
-            var yValues = Samples[i].otu_ids.slice(0,10)
-            var hoverText = Samples[i].otu_labels.slice(0,10)
-        }
+        Samples_filtered = Samples.filter(d2 => d2.id == sample)
+     
+        var xValues = Samples_filtered[0].sample_values.slice(0,10)
+        var yValues = Samples_filtered[0].otu_ids.slice(0,10)
+        var hoverText = Samples_filtered[0].otu_labels.slice(0,10)
 
         yValuesString = yValues.map(x => `OTU ${x}`)
 
@@ -38,13 +36,11 @@ function optionChanged(SubjectID) {
         Plotly.newPlot('plot', traceData, layout)
  
         // -----------------Bubble Chart--------------------
-        let Samples2 = d.samples
-        
-        for (let i = 0; i < Samples2.length; i++) {
-            var xValues2 = Samples2[i].sample_values.slice(0,10)
-            var yValues2 = Samples2[i].otu_ids.slice(0,10)
-            var hoverText2 = Samples2[i].otu_labels.slice(0,10)
-        }
+
+        var xValues2 = Samples_filtered[0].sample_values
+        var yValues2 = Samples_filtered[0].otu_ids
+        var hoverText2 = Samples_filtered[0].otu_labels
+
 
         let trace2 = {
             x: yValues2,
@@ -63,20 +59,27 @@ function optionChanged(SubjectID) {
         let layout2 = {
             title: 'Scatter Plot'
         }
-        // -----------------Demographics table--------------------
+        
         Plotly.newPlot('plot2', traceData2, layout2)
 
-        let Samples3 = d.samples
+        // -----------------Demographics table--------------------
+        
+        let Samples3 = d.metadata
+        Samples_filtered2 = Samples3.filter(d4 => d4.id == sample)
         d3
-        .select('h3')
+        .select('#sample-metadata')
         .selectAll('p')
         .data(d)
         .enter()
         .append('p')
-        .text('test')
-
-        console.log(d)
+        .text("This is a test")
     }) 
+}
+
+
+function optionChanged(SubjectID) {
+    buildCharts(SubjectID);
+    
 }
 
 function initialize() {
@@ -86,7 +89,7 @@ function initialize() {
         console.log(subjectIDs);
         var select = d3.select('#selDataset');
         for (let i = 0; i < subjectIDs.length; i++) {
-            select.append("option").attr("value",subjectIDs[i]).text(subjectIDs[i]);   
+            select.append("option").property("value",subjectIDs[i]).text(subjectIDs[i]);   
         }
     });
     // draw the plots for the first subject
